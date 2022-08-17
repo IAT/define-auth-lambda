@@ -32,12 +32,13 @@ public class CognitoDefineAuthChallengeLambdaHandler implements RequestStreamHan
         }
 
         JsonNode session = requestNode.get("session");
+        System.out.println("SESSION "+session);
         int sessionLength = mapper.convertValue(session, ArrayList.class).size();
-        if ((sessionLength) >= 3 && !Boolean.parseBoolean(session.get(sessionLength - 1).get("challengeRequest").asText())) {
+        if ((sessionLength) >= 3 && !Boolean.parseBoolean(session.get(sessionLength - 1).get("challengeResult").asText())) {
             ((ObjectNode) responseNode).put("issueTokens", false);
             ((ObjectNode) responseNode).put("failAuthentication", true);
             throw new IllegalArgumentException("Invalid OTP even after completing 3 times");
-        } else if ((sessionLength) > 0 && !Boolean.parseBoolean(session.get(sessionLength - 1).get("challengeRequest").asText())) {
+        } else if ((sessionLength) > 0 && Boolean.parseBoolean(session.get(sessionLength - 1).get("challengeResult").asText())) {
             ((ObjectNode) responseNode).put("issueTokens", true);
             ((ObjectNode) responseNode).put("failAuthentication", false);
         } else {
