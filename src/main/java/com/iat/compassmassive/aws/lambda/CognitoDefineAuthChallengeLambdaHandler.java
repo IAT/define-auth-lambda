@@ -18,10 +18,8 @@ public class CognitoDefineAuthChallengeLambdaHandler implements RequestStreamHan
     @Override
     public void handleRequest(InputStream inputStream, OutputStream outputStream, Context context) throws IOException {
         LambdaLogger log = context.getLogger();
-        log.log("InputStream:" + inputStream);
         JsonNode mainNode = mapper.readTree(inputStream);
         JsonNode requestNode = mainNode.get("request");
-
         JsonNode responseNode = mainNode.get("response");
         if (Boolean.parseBoolean(requestNode.get("userNotFound").asText())) {
 
@@ -32,7 +30,6 @@ public class CognitoDefineAuthChallengeLambdaHandler implements RequestStreamHan
         }
 
         JsonNode session = requestNode.get("session");
-        System.out.println("SESSION "+session);
         int sessionLength = mapper.convertValue(session, ArrayList.class).size();
         if ((sessionLength) >= 3 && !Boolean.parseBoolean(session.get(sessionLength - 1).get("challengeResult").asText())) {
             ((ObjectNode) responseNode).put("issueTokens", false);
@@ -46,6 +43,7 @@ public class CognitoDefineAuthChallengeLambdaHandler implements RequestStreamHan
             ((ObjectNode) responseNode).put("failAuthentication", false);
             ((ObjectNode) responseNode).put("challengeName", "CUSTOM_CHALLENGE");
         }
+        System.out.println("MAIN NODE "+mainNode);
         mapper.writeValue(outputStream, mainNode);
     }
 
